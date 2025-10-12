@@ -6,121 +6,106 @@ import java.util.Optional;
 import com.swift.backend.model.Product;
 import com.swift.backend.service.ProductService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/products")
 public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController() {
-        this.productService = new ProductService();
+    @Inject
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/products", this::getAllProducts);
-        app.get("/api/products/{id}", this::getProductById);
-        app.get("/api/products/categoria/{categoriaId}", this::getProductsByCategoria);
-        app.get("/api/products/search", this::searchProducts);
-        app.post("/api/products", this::createProduct);
-        app.put("/api/products/{id}", this::updateProduct);
-        app.delete("/api/products/{id}", this::deleteProduct);
-    }
-
-    private void getAllProducts(Context ctx) {
+    @Get
+    public HttpResponse<List<Product>> getAllProducts() {
         try {
             List<Product> products = productService.getAllProducts();
-            ctx.json(products);
+            return HttpResponse.ok(products);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar produtos: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getProductById(Context ctx) {
+    @Get("/{id}")
+    public HttpResponse<?> getProductById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Product> product = productService.getProductById(id);
             
             if (product.isPresent()) {
-                ctx.json(product.get());
+                return HttpResponse.ok(product.get());
             } else {
-                ctx.status(404).result("Produto não encontrado");
+                return HttpResponse.notFound("Produto não encontrado");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar produto: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getProductsByCategoria(Context ctx) {
+    @Get("/categoria/{categoriaId}")
+    public HttpResponse<?> getProductsByCategoria(@PathVariable Integer categoriaId) {
         try {
-            Integer categoriaId = Integer.parseInt(ctx.pathParam("categoriaId"));
             List<Product> products = productService.getProductsByCategoria(categoriaId);
-            ctx.json(products);
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID de categoria inválido");
+            return HttpResponse.ok(products);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar produtos: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void searchProducts(Context ctx) {
+    @Get("/search")
+    public HttpResponse<?> searchProducts(@QueryValue String nome) {
         try {
-            String nome = ctx.queryParam("nome");
             if (nome == null || nome.isEmpty()) {
-                ctx.status(400).result("Parâmetro 'nome' é obrigatório");
-                return;
+                return HttpResponse.badRequest("Parâmetro 'nome' é obrigatório");
             }
             
             List<Product> products = productService.searchProducts(nome);
-            ctx.json(products);
+            return HttpResponse.ok(products);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar produtos: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createProduct(Context ctx) {
+    @Post
+    public HttpResponse<?> createProduct(@Body Product product) {
         try {
-            Product product = ctx.bodyAsClass(Product.class);
             Product created = productService.createProduct(product);
-            ctx.status(201).json(created);
+            return HttpResponse.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar produto: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void updateProduct(Context ctx) {
+    @Put("/{id}")
+    public HttpResponse<?> updateProduct(@PathVariable Integer id, @Body Product product) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Product product = ctx.bodyAsClass(Product.class);
             productService.updateProduct(id, product);
-            ctx.status(200).result("Produto atualizado com sucesso");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Produto atualizado com sucesso");
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao atualizar produto: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void deleteProduct(Context ctx) {
+    @Delete("/{id}")
+    public HttpResponse<?> deleteProduct(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             boolean deleted = productService.deleteProduct(id);
             
             if (deleted) {
-                ctx.status(204);
+                return HttpResponse.noContent();
             } else {
-                ctx.status(404).result("Produto não encontrado");
+                return HttpResponse.notFound("Produto não encontrado");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao deletar produto: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

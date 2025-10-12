@@ -6,74 +6,67 @@ import java.util.Optional;
 import com.swift.backend.model.Endereco;
 import com.swift.backend.service.EnderecoService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/enderecos")
 public class EnderecoController {
 
     private final EnderecoService enderecoService;
 
-    public EnderecoController() {
-        this.enderecoService = new EnderecoService();
+    @Inject
+    public EnderecoController(EnderecoService enderecoService) {
+        this.enderecoService = enderecoService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/enderecos", this::getAllEnderecos);
-        app.get("/api/enderecos/{id}", this::getEnderecoById);
-        app.post("/api/enderecos", this::createEndereco);
-        app.put("/api/enderecos/{id}", this::updateEndereco);
-    }
-
-    private void getAllEnderecos(Context ctx) {
+    @Get
+    public HttpResponse<List<Endereco>> getAllEnderecos() {
         try {
             List<Endereco> enderecos = enderecoService.getAllEnderecos();
-            ctx.json(enderecos);
+            return HttpResponse.ok(enderecos);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar endereços: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getEnderecoById(Context ctx) {
+    @Get("/{id}")
+    public HttpResponse<?> getEnderecoById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Endereco> endereco = enderecoService.getEnderecoById(id);
             
             if (endereco.isPresent()) {
-                ctx.json(endereco.get());
+                return HttpResponse.ok(endereco.get());
             } else {
-                ctx.status(404).result("Endereço não encontrado");
+                return HttpResponse.notFound("Endereço não encontrado");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar endereço: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createEndereco(Context ctx) {
+    @Post
+    public HttpResponse<?> createEndereco(@Body Endereco endereco) {
         try {
-            Endereco endereco = ctx.bodyAsClass(Endereco.class);
             Endereco created = enderecoService.createEndereco(endereco);
-            ctx.status(201).json(created);
+            return HttpResponse.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar endereço: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void updateEndereco(Context ctx) {
+    @Put("/{id}")
+    public HttpResponse<?> updateEndereco(@PathVariable Integer id, @Body Endereco endereco) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Endereco endereco = ctx.bodyAsClass(Endereco.class);
             enderecoService.updateEndereco(id, endereco);
-            ctx.status(200).result("Endereço atualizado com sucesso");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Endereço atualizado com sucesso");
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao atualizar endereço: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

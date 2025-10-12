@@ -8,6 +8,9 @@ import com.swift.backend.dao.CarrinhoDAO;
 import com.swift.backend.model.Carrinho;
 import com.swift.backend.model.ItemDoCarrinho;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class CarrinhoService {
     
     private final CarrinhoDAO carrinhoDAO;

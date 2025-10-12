@@ -6,92 +6,82 @@ import java.util.Optional;
 import com.swift.backend.model.Categoria;
 import com.swift.backend.service.CategoriaService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/categorias")
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    public CategoriaController() {
-        this.categoriaService = new CategoriaService();
+    @Inject
+    public CategoriaController(CategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/categorias", this::getAllCategorias);
-        app.get("/api/categorias/{id}", this::getCategoriaById);
-        app.post("/api/categorias", this::createCategoria);
-        app.put("/api/categorias/{id}", this::updateCategoria);
-        app.delete("/api/categorias/{id}", this::deleteCategoria);
-    }
-
-    private void getAllCategorias(Context ctx) {
+    @Get
+    public HttpResponse<List<Categoria>> getAllCategorias() {
         try {
             List<Categoria> categorias = categoriaService.getAllCategorias();
-            ctx.json(categorias);
+            return HttpResponse.ok(categorias);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar categorias: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getCategoriaById(Context ctx) {
+    @Get("/{id}")
+    public HttpResponse<?> getCategoriaById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Categoria> categoria = categoriaService.getCategoriaById(id);
             
             if (categoria.isPresent()) {
-                ctx.json(categoria.get());
+                return HttpResponse.ok(categoria.get());
             } else {
-                ctx.status(404).result("Categoria não encontrada");
+                return HttpResponse.notFound("Categoria não encontrada");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar categoria: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createCategoria(Context ctx) {
+    @Post
+    public HttpResponse<?> createCategoria(@Body Categoria categoria) {
         try {
-            Categoria categoria = ctx.bodyAsClass(Categoria.class);
             Categoria created = categoriaService.createCategoria(categoria);
-            ctx.status(201).json(created);
+            return HttpResponse.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar categoria: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void updateCategoria(Context ctx) {
+    @Put("/{id}")
+    public HttpResponse<?> updateCategoria(@PathVariable Integer id, @Body Categoria categoria) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Categoria categoria = ctx.bodyAsClass(Categoria.class);
             categoriaService.updateCategoria(id, categoria);
-            ctx.status(200).result("Categoria atualizada com sucesso");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Categoria atualizada com sucesso");
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao atualizar categoria: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void deleteCategoria(Context ctx) {
+    @Delete("/{id}")
+    public HttpResponse<?> deleteCategoria(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             boolean deleted = categoriaService.deleteCategoria(id);
             
             if (deleted) {
-                ctx.status(204);
+                return HttpResponse.noContent();
             } else {
-                ctx.status(404).result("Categoria não encontrada");
+                return HttpResponse.notFound("Categoria não encontrada");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao deletar categoria: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

@@ -7,6 +7,9 @@ import java.util.Optional;
 import com.swift.backend.dao.ProductDAO;
 import com.swift.backend.model.Product;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class ProductService {
     
     private final ProductDAO productDAO;

@@ -7,71 +7,65 @@ import com.swift.backend.model.Loja;
 import com.swift.backend.model.Product;
 import com.swift.backend.service.LojaService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/lojas")
 public class LojaController {
 
     private final LojaService lojaService;
 
-    public LojaController() {
-        this.lojaService = new LojaService();
+    @Inject
+    public LojaController(LojaService lojaService) {
+        this.lojaService = lojaService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/lojas", this::getAllLojas);
-        app.get("/api/lojas/{id}", this::getLojaById);
-        app.get("/api/lojas/{id}/produtos", this::getProdutosByLojaId);
-        app.post("/api/lojas", this::createLoja);
-    }
-
-    private void getAllLojas(Context ctx) {
+    @Get
+    public HttpResponse<List<Loja>> getAllLojas() {
         try {
             List<Loja> lojas = lojaService.getAllLojas();
-            ctx.json(lojas);
+            return HttpResponse.ok(lojas);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar lojas: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getLojaById(Context ctx) {
+    @Get("/{id}")
+    public HttpResponse<?> getLojaById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Loja> loja = lojaService.getLojaById(id);
             
             if (loja.isPresent()) {
-                ctx.json(loja.get());
+                return HttpResponse.ok(loja.get());
             } else {
-                ctx.status(404).result("Loja não encontrada");
+                return HttpResponse.notFound("Loja não encontrada");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar loja: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getProdutosByLojaId(Context ctx) {
+    @Get("/{id}/produtos")
+    public HttpResponse<List<Product>> getProdutosByLojaId(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             List<Product> produtos = lojaService.getProdutosByLojaId(id);
-            ctx.json(produtos);
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok(produtos);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar produtos: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createLoja(Context ctx) {
+    @Post
+    public HttpResponse<?> createLoja(@Body Loja loja) {
         try {
-            Loja loja = ctx.bodyAsClass(Loja.class);
             Loja created = lojaService.createLoja(loja);
-            ctx.status(201).json(created);
+            return HttpResponse.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar loja: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

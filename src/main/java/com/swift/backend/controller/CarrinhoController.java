@@ -7,89 +7,73 @@ import com.swift.backend.model.Carrinho;
 import com.swift.backend.model.ItemDoCarrinho;
 import com.swift.backend.service.CarrinhoService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/carrinho")
 public class CarrinhoController {
 
     private final CarrinhoService carrinhoService;
 
-    public CarrinhoController() {
-        this.carrinhoService = new CarrinhoService();
+    @Inject
+    public CarrinhoController(CarrinhoService carrinhoService) {
+        this.carrinhoService = carrinhoService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/carrinho/usuario/{usuarioId}", this::getCarrinhoByUsuarioId);
-        app.post("/api/carrinho/{usuarioId}", this::createCarrinho);
-        app.get("/api/carrinho/{carrinhoId}/itens", this::getItensDoCarrinho);
-        app.post("/api/carrinho/{carrinhoId}/itens/{itemId}", this::adicionarItem);
-        app.delete("/api/carrinho/{carrinhoId}/itens/{itemId}", this::removerItem);
-    }
-
-    private void getCarrinhoByUsuarioId(Context ctx) {
+    @Get("/usuario/{usuarioId}")
+    public HttpResponse<?> getCarrinhoByUsuarioId(@PathVariable Integer usuarioId) {
         try {
-            Integer usuarioId = Integer.parseInt(ctx.pathParam("usuarioId"));
             Optional<Carrinho> carrinho = carrinhoService.getCarrinhoByUsuarioId(usuarioId);
             
             if (carrinho.isPresent()) {
-                ctx.json(carrinho.get());
+                return HttpResponse.ok(carrinho.get());
             } else {
-                ctx.status(404).result("Carrinho não encontrado para este usuário");
+                return HttpResponse.notFound("Carrinho não encontrado para este usuário");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID de usuário inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar carrinho: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createCarrinho(Context ctx) {
+    @Post("/{usuarioId}")
+    public HttpResponse<?> createCarrinho(@PathVariable Integer usuarioId) {
         try {
-            Integer usuarioId = Integer.parseInt(ctx.pathParam("usuarioId"));
             Carrinho carrinho = carrinhoService.createCarrinho(usuarioId);
-            ctx.status(201).json(carrinho);
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID de usuário inválido");
+            return HttpResponse.status(HttpStatus.CREATED).body(carrinho);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar carrinho: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getItensDoCarrinho(Context ctx) {
+    @Get("/{carrinhoId}/itens")
+    public HttpResponse<List<ItemDoCarrinho>> getItensDoCarrinho(@PathVariable Integer carrinhoId) {
         try {
-            Integer carrinhoId = Integer.parseInt(ctx.pathParam("carrinhoId"));
             List<ItemDoCarrinho> itens = carrinhoService.getItensDoCarrinho(carrinhoId);
-            ctx.json(itens);
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID de carrinho inválido");
+            return HttpResponse.ok(itens);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar itens: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void adicionarItem(Context ctx) {
+    @Post("/{carrinhoId}/itens/{itemId}")
+    public HttpResponse<?> adicionarItem(@PathVariable Integer carrinhoId, @PathVariable Integer itemId) {
         try {
-            Integer carrinhoId = Integer.parseInt(ctx.pathParam("carrinhoId"));
-            Integer itemId = Integer.parseInt(ctx.pathParam("itemId"));
             carrinhoService.adicionarItemAoCarrinho(carrinhoId, itemId);
-            ctx.status(200).result("Item adicionado ao carrinho");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Item adicionado ao carrinho");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao adicionar item: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void removerItem(Context ctx) {
+    @Delete("/{carrinhoId}/itens/{itemId}")
+    public HttpResponse<?> removerItem(@PathVariable Integer carrinhoId, @PathVariable Integer itemId) {
         try {
-            Integer carrinhoId = Integer.parseInt(ctx.pathParam("carrinhoId"));
-            Integer itemId = Integer.parseInt(ctx.pathParam("itemId"));
             carrinhoService.removerItemDoCarrinho(carrinhoId, itemId);
-            ctx.status(200).result("Item removido do carrinho");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Item removido do carrinho");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao remover item: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

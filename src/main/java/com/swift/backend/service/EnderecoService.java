@@ -7,6 +7,9 @@ import java.util.Optional;
 import com.swift.backend.dao.EnderecoDAO;
 import com.swift.backend.model.Endereco;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class EnderecoService {
     
     private final EnderecoDAO enderecoDAO;

@@ -7,6 +7,9 @@ import java.util.Optional;
 import com.swift.backend.dao.CategoriaDAO;
 import com.swift.backend.model.Categoria;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class CategoriaService {
     
     private final CategoriaDAO categoriaDAO;

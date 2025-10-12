@@ -10,6 +10,9 @@ import com.swift.backend.dao.ProductDAO;
 import com.swift.backend.model.Loja;
 import com.swift.backend.model.Product;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class LojaService {
     
     private final LojaDAO lojaDAO;

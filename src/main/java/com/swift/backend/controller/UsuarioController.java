@@ -6,92 +6,82 @@ import java.util.Optional;
 import com.swift.backend.model.Usuario;
 import com.swift.backend.service.UsuarioService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.annotation.*;
+import jakarta.inject.Inject;
 
+@Controller("/api/usuarios")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    public UsuarioController() {
-        this.usuarioService = new UsuarioService();
+    @Inject
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
-    public void registerRoutes(Javalin app) {
-        app.get("/api/usuarios", this::getAllUsuarios);
-        app.get("/api/usuarios/{id}", this::getUsuarioById);
-        app.post("/api/usuarios", this::createUsuario);
-        app.put("/api/usuarios/{id}", this::updateUsuario);
-        app.delete("/api/usuarios/{id}", this::deleteUsuario);
-    }
-
-    private void getAllUsuarios(Context ctx) {
+    @Get
+    public HttpResponse<List<Usuario>> getAllUsuarios() {
         try {
             List<Usuario> usuarios = usuarioService.getAllUsuarios();
-            ctx.json(usuarios);
+            return HttpResponse.ok(usuarios);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar usuários: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void getUsuarioById(Context ctx) {
+    @Get("/{id}")
+    public HttpResponse<?> getUsuarioById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Usuario> usuario = usuarioService.getUsuarioById(id);
             
             if (usuario.isPresent()) {
-                ctx.json(usuario.get());
+                return HttpResponse.ok(usuario.get());
             } else {
-                ctx.status(404).result("Usuário não encontrado");
+                return HttpResponse.notFound("Usuário não encontrado");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar usuário: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void createUsuario(Context ctx) {
+    @Post
+    public HttpResponse<?> createUsuario(@Body Usuario usuario) {
         try {
-            Usuario usuario = ctx.bodyAsClass(Usuario.class);
             Usuario created = usuarioService.createUsuario(usuario);
-            ctx.status(201).json(created);
+            return HttpResponse.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar usuário: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void updateUsuario(Context ctx) {
+    @Put("/{id}")
+    public HttpResponse<?> updateUsuario(@PathVariable Integer id, @Body Usuario usuario) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Usuario usuario = ctx.bodyAsClass(Usuario.class);
             usuarioService.updateUsuario(id, usuario);
-            ctx.status(200).result("Usuário atualizado com sucesso");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return HttpResponse.ok("Usuário atualizado com sucesso");
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return HttpResponse.badRequest(e.getMessage());
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao atualizar usuário: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 
-    private void deleteUsuario(Context ctx) {
+    @Delete("/{id}")
+    public HttpResponse<?> deleteUsuario(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             boolean deleted = usuarioService.deleteUsuario(id);
             
             if (deleted) {
-                ctx.status(204);
+                return HttpResponse.noContent();
             } else {
-                ctx.status(404).result("Usuário não encontrado");
+                return HttpResponse.notFound("Usuário não encontrado");
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao deletar usuário: " + e.getMessage());
+            return HttpResponse.serverError();
         }
     }
 }

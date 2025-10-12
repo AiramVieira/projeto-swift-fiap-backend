@@ -7,6 +7,9 @@ import java.util.Optional;
 import com.swift.backend.dao.UsuarioDAO;
 import com.swift.backend.model.Usuario;
 
+import jakarta.inject.Singleton;
+
+@Singleton
 public class UsuarioService {
     
     private final UsuarioDAO usuarioDAO;
