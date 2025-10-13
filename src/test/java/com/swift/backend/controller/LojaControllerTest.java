@@ -44,7 +44,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas - Deve retornar todas as lojas com sucesso")
-    void testGetAllLojas_Success() throws SQLException {
+    void testGetAllLojasSuccess() throws SQLException {
         List<Loja> lojas = new ArrayList<>();
         lojas.add(lojaMock);
         
@@ -54,7 +54,6 @@ class LojaControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Loja> responseLojas = (List<Loja>) response.body();
         assertEquals(1, responseLojas.size());
         verify(lojaService, times(1)).getAllLojas();
@@ -62,13 +61,12 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas - Deve retornar lista vazia quando não há lojas")
-    void testGetAllLojas_EmptyList() throws SQLException {
+    void testGetAllLojasEmptyList() throws SQLException {
         when(lojaService.getAllLojas()).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = lojaController.getAllLojas();
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        @SuppressWarnings("unchecked")
         List<Loja> responseLojas = (List<Loja>) response.body();
         assertTrue(responseLojas.isEmpty());
         verify(lojaService, times(1)).getAllLojas();
@@ -76,7 +74,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetAllLojas_Error() throws SQLException {
+    void testGetAllLojasError() throws SQLException {
         when(lojaService.getAllLojas()).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = lojaController.getAllLojas();
@@ -87,7 +85,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id} - Deve retornar loja por ID com sucesso")
-    void testGetLojaById_Success() throws SQLException {
+    void testGetLojaByIdSuccess() throws SQLException {
         when(lojaService.getLojaById(1)).thenReturn(Optional.of(lojaMock));
 
         HttpResponse<?> response = lojaController.getLojaById(1);
@@ -101,7 +99,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id} - Deve retornar 404 quando loja não encontrada")
-    void testGetLojaById_NotFound() throws SQLException {
+    void testGetLojaByIdNotFound() throws SQLException {
         when(lojaService.getLojaById(999)).thenReturn(Optional.empty());
 
         HttpResponse<?> response = lojaController.getLojaById(999);
@@ -112,7 +110,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetLojaById_Error() throws SQLException {
+    void testGetLojaByIdError() throws SQLException {
         when(lojaService.getLojaById(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = lojaController.getLojaById(1);
@@ -123,7 +121,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id}/produtos - Deve retornar produtos da loja")
-    void testGetProdutosByLojaId_Success() throws SQLException {
+    void testGetProdutosByLojaIdSuccess() throws SQLException {
         List<Product> produtos = new ArrayList<>();
         Product product = new Product();
         product.setId(1);
@@ -136,7 +134,6 @@ class LojaControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Product> responseProdutos = (List<Product>) response.body();
         assertEquals(1, responseProdutos.size());
         verify(lojaService, times(1)).getProdutosByLojaId(1);
@@ -144,13 +141,12 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id}/produtos - Deve retornar lista vazia quando não há produtos")
-    void testGetProdutosByLojaId_EmptyList() throws SQLException {
+    void testGetProdutosByLojaIdEmptyList() throws SQLException {
         when(lojaService.getProdutosByLojaId(1)).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = lojaController.getProdutosByLojaId(1);
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        @SuppressWarnings("unchecked")
         List<Product> responseProdutos = (List<Product>) response.body();
         assertTrue(responseProdutos.isEmpty());
         verify(lojaService, times(1)).getProdutosByLojaId(1);
@@ -158,7 +154,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("GET /api/lojas/{id}/produtos - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetProdutosByLojaId_Error() throws SQLException {
+    void testGetProdutosByLojaIdError() throws SQLException {
         when(lojaService.getProdutosByLojaId(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = lojaController.getProdutosByLojaId(1);
@@ -169,7 +165,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("POST /api/lojas - Deve criar loja com sucesso")
-    void testCreateLoja_Success() throws SQLException {
+    void testCreateLojaSuccess() throws SQLException {
         Loja novaLoja = new Loja();
         novaLoja.setEnderecoId(2);
 
@@ -190,7 +186,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("POST /api/lojas - Deve retornar erro 400 com dados inválidos")
-    void testCreateLoja_InvalidData() throws SQLException {
+    void testCreateLojaInvalidData() throws SQLException {
         Loja lojaInvalida = new Loja();
         lojaInvalida.setEnderecoId(null);
 
@@ -205,7 +201,7 @@ class LojaControllerTest {
 
     @Test
     @DisplayName("POST /api/lojas - Deve retornar erro 500 quando ocorrer exceção")
-    void testCreateLoja_Error() throws SQLException {
+    void testCreateLojaError() throws SQLException {
         when(lojaService.createLoja(any(Loja.class)))
                 .thenThrow(new SQLException("Database error"));
 

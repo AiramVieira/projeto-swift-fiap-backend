@@ -1,92 +1,88 @@
 package com.swift.backend.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.sql.*;
+import java.util.*;
 import com.swift.backend.config.DatabaseConfig;
 import com.swift.backend.model.Endereco;
 
 public class EnderecoDAO {
 
     public List<Endereco> findAll() throws SQLException {
-        List<Endereco> enderecos = new ArrayList<>();
         String sql = "SELECT * FROM endereco";
+        Connection conn = DatabaseConfig.getConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             Statement statement = conn.createStatement();
-             ResultSet rs = statement.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                enderecos.add(mapResultSetToEndereco(rs));
-            }
+        List<Endereco> enderecos = new ArrayList<>();
+        while (rs.next()) {
+            enderecos.add(mapResultSet(rs));
         }
+        
+        rs.close();
+        stmt.close();
+        conn.close();
         
         return enderecos;
     }
 
     public Optional<Endereco> findById(Integer id) throws SQLException {
         String sql = "SELECT * FROM endereco WHERE id = ?";
+        Connection conn = DatabaseConfig.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            
-            statement.setInt(1, id);
-            
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToEndereco(rs));
-                }
-            }
-        }
+        stmt.setInt(1, id);
+        ResultSet rs = stmt.executeQuery();
         
-        return Optional.empty();
+        Optional<Endereco> result = rs.next() ? Optional.of(mapResultSet(rs)) : Optional.empty();
+        
+        rs.close();
+        stmt.close();
+        conn.close();
+        
+        return result;
     }
 
     public Endereco save(Endereco endereco) throws SQLException {
-        // Oracle JDBC nem sempre suporta getGeneratedKeys; usar RETURNING INTO garante o id
-        String sql = "BEGIN INSERT INTO endereco (descricao, cep, latitude, longitude) VALUES (?, ?, ?, ?) RETURNING id INTO ?; END;";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             CallableStatement callable = conn.prepareCall(sql)) {
-
-            callable.setString(1, endereco.getDescricao());
-            callable.setString(2, endereco.getCep());
-            callable.setBigDecimal(3, endereco.getLatitude());
-            callable.setBigDecimal(4, endereco.getLongitude());
-            callable.registerOutParameter(5, Types.INTEGER);
-
-            callable.execute();
-            endereco.setId(callable.getInt(5));
+        String sql = "BEGIN INSERT INTO endereco (descricao, cep, latitude, longitude) " +
+                     "VALUES (?, ?, ?, ?) RETURNING id INTO ?; END;";
+        Connection conn = DatabaseConfig.getConnection();
+        CallableStatement stmt = conn.prepareCall(sql);
+        
+        stmt.setString(1, endereco.getDescricao());
+        stmt.setString(2, endereco.getCep());
+        stmt.setBigDecimal(3, endereco.getLatitude());
+        stmt.setBigDecimal(4, endereco.getLongitude());
+        stmt.registerOutParameter(5, Types.INTEGER);
+        stmt.execute();
+        
+        Object idObj = stmt.getObject(5);
+        if (idObj != null) {
+            endereco.setId(((Number) idObj).intValue());
         }
-
+        
+        stmt.close();
+        conn.close();
+        
         return endereco;
     }
 
     public void update(Endereco endereco) throws SQLException {
         String sql = "UPDATE endereco SET descricao = ?, cep = ?, latitude = ?, longitude = ? WHERE id = ?";
+        Connection conn = DatabaseConfig.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            
-            statement.setString(1, endereco.getDescricao());
-            statement.setString(2, endereco.getCep());
-            statement.setObject(3, endereco.getLatitude());
-            statement.setObject(4, endereco.getLongitude());
-            statement.setInt(5, endereco.getId());
-            
-            statement.executeUpdate();
-        }
+        stmt.setString(1, endereco.getDescricao());
+        stmt.setString(2, endereco.getCep());
+        stmt.setBigDecimal(3, endereco.getLatitude());
+        stmt.setBigDecimal(4, endereco.getLongitude());
+        stmt.setInt(5, endereco.getId());
+        stmt.executeUpdate();
+        
+        stmt.close();
+        conn.close();
     }
 
-    private Endereco mapResultSetToEndereco(ResultSet rs) throws SQLException {
+    private Endereco mapResultSet(ResultSet rs) throws SQLException {
         Endereco endereco = new Endereco();
         endereco.setId(rs.getInt("id"));
         endereco.setDescricao(rs.getString("descricao"));
@@ -96,4 +92,3 @@ public class EnderecoDAO {
         return endereco;
     }
 }
-

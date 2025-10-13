@@ -1,95 +1,97 @@
 package com.swift.backend.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.sql.*;
+import java.util.*;
 import com.swift.backend.config.DatabaseConfig;
 import com.swift.backend.model.Loja;
+import oracle.jdbc.OraclePreparedStatement;
+import oracle.jdbc.OracleTypes;
 
 public class LojaDAO {
 
     public List<Loja> findAll() throws SQLException {
-        List<Loja> lojas = new ArrayList<>();
         String sql = "SELECT * FROM loja";
+        Connection conn = DatabaseConfig.getConnection();
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             Statement statement = conn.createStatement();
-             ResultSet rs = statement.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                Loja loja = new Loja();
-                loja.setId(rs.getInt("id"));
-                loja.setEnderecoId(rs.getInt("fk_endereco_id"));
-                lojas.add(loja);
-            }
+        List<Loja> lojas = new ArrayList<>();
+        while (rs.next()) {
+            lojas.add(mapResultSet(rs));
         }
+        
+        rs.close();
+        stmt.close();
+        conn.close();
         
         return lojas;
     }
 
     public Optional<Loja> findById(Integer id) throws SQLException {
         String sql = "SELECT * FROM loja WHERE id = ?";
+        Connection conn = DatabaseConfig.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            
-            statement.setInt(1, id);
-            
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    Loja loja = new Loja();
-                    loja.setId(rs.getInt("id"));
-                    loja.setEnderecoId(rs.getInt("fk_endereco_id"));
-                    return Optional.of(loja);
-                }
-            }
-        }
+        stmt.setInt(1, id);
+        ResultSet rs = stmt.executeQuery();
         
-        return Optional.empty();
+        Optional<Loja> result = rs.next() ? Optional.of(mapResultSet(rs)) : Optional.empty();
+        
+        rs.close();
+        stmt.close();
+        conn.close();
+        
+        return result;
     }
 
     public List<Integer> findProdutosIdsByLojaId(Integer lojaId) throws SQLException {
-        List<Integer> produtosIds = new ArrayList<>();
         String sql = "SELECT fk_produto_id FROM loja_produtos WHERE fk_loja_id = ?";
+        Connection conn = DatabaseConfig.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql)) {
-            
-            statement.setInt(1, lojaId);
-            
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    produtosIds.add(rs.getInt("fk_produto_id"));
-                }
-            }
+        stmt.setInt(1, lojaId);
+        ResultSet rs = stmt.executeQuery();
+        
+        List<Integer> ids = new ArrayList<>();
+        while (rs.next()) {
+            ids.add(rs.getInt("fk_produto_id"));
         }
         
-        return produtosIds;
+        rs.close();
+        stmt.close();
+        conn.close();
+        
+        return ids;
     }
 
     public Loja save(Loja loja) throws SQLException {
-        String sql = "INSERT INTO loja (fk_endereco_id) VALUES (?)";
+        String sql = "INSERT INTO loja (fk_endereco_id) VALUES (?) RETURNING id INTO ?";
+        Connection conn = DatabaseConfig.getConnection();
+        OraclePreparedStatement stmt = (OraclePreparedStatement) conn.prepareStatement(sql);
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            statement.setInt(1, loja.getEnderecoId());
-            statement.executeUpdate();
-            
-            try (ResultSet rs = statement.getGeneratedKeys()) {
-                if (rs.next()) {
-                    loja.setId(rs.getInt(1));
-                }
+        stmt.setInt(1, loja.getEnderecoId());
+        stmt.registerReturnParameter(2, OracleTypes.NUMBER);
+        stmt.executeUpdate();
+        
+        ResultSet rs = stmt.getReturnResultSet();
+        if (rs.next()) {
+            Object idObj = rs.getObject(1);
+            if (idObj != null) {
+                loja.setId(((Number) idObj).intValue());
             }
         }
         
+        rs.close();
+        stmt.close();
+        conn.close();
+        
+        return loja;
+    }
+
+    private Loja mapResultSet(ResultSet rs) throws SQLException {
+        Loja loja = new Loja();
+        loja.setId(rs.getInt("id"));
+        loja.setEnderecoId(rs.getInt("fk_endereco_id"));
         return loja;
     }
 }
-

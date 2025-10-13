@@ -40,7 +40,7 @@ class HealthControllerTest {
 
     @Test
     @DisplayName("GET /health - Deve conter as chaves corretas")
-    void testHealth_Keys() {
+    void testHealthKeys() {
         Map<String, String> response = healthController.health();
 
         assertTrue(response.containsKey("status"));

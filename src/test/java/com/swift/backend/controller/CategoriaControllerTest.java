@@ -45,7 +45,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias - Deve retornar todas as categorias com sucesso")
-    void testGetAllCategorias_Success() throws SQLException {
+    void testGetAllCategoriasSuccess() throws SQLException {
         List<Categoria> categorias = new ArrayList<>();
         categorias.add(categoriaMock);
         
@@ -60,7 +60,6 @@ class CategoriaControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Categoria> responseCategorias = (List<Categoria>) response.body();
         assertEquals(2, responseCategorias.size());
         assertEquals("Eletrônicos", responseCategorias.get(0).getDescricao());
@@ -69,14 +68,13 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias - Deve retornar lista vazia quando não há categorias")
-    void testGetAllCategorias_EmptyList() throws SQLException {
+    void testGetAllCategoriasEmptyList() throws SQLException {
         when(categoriaService.getAllCategorias()).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = categoriaController.getAllCategorias();
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Categoria> responseCategorias = (List<Categoria>) response.body();
         assertTrue(responseCategorias.isEmpty());
         verify(categoriaService, times(1)).getAllCategorias();
@@ -84,7 +82,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetAllCategorias_Error() throws SQLException {
+    void testGetAllCategoriasError() throws SQLException {
         when(categoriaService.getAllCategorias()).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = categoriaController.getAllCategorias();
@@ -95,7 +93,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias/{id} - Deve retornar categoria por ID com sucesso")
-    void testGetCategoriaById_Success() throws SQLException {
+    void testGetCategoriaByIdSuccess() throws SQLException {
         when(categoriaService.getCategoriaById(1)).thenReturn(Optional.of(categoriaMock));
 
         HttpResponse<?> response = categoriaController.getCategoriaById(1);
@@ -110,7 +108,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias/{id} - Deve retornar 404 quando categoria não encontrada")
-    void testGetCategoriaById_NotFound() throws SQLException {
+    void testGetCategoriaByIdNotFound() throws SQLException {
         when(categoriaService.getCategoriaById(999)).thenReturn(Optional.empty());
 
         HttpResponse<?> response = categoriaController.getCategoriaById(999);
@@ -121,7 +119,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("GET /api/categorias/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetCategoriaById_Error() throws SQLException {
+    void testGetCategoriaByIdError() throws SQLException {
         when(categoriaService.getCategoriaById(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = categoriaController.getCategoriaById(1);
@@ -132,7 +130,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("POST /api/categorias - Deve criar categoria com sucesso")
-    void testCreateCategoria_Success() throws SQLException {
+    void testCreateCategoriaSuccess() throws SQLException {
         Categoria novaCategoria = new Categoria();
         novaCategoria.setDescricao("Livros");
 
@@ -154,7 +152,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("POST /api/categorias - Deve retornar erro 400 com dados inválidos")
-    void testCreateCategoria_InvalidData() throws SQLException {
+    void testCreateCategoriaInvalidData() throws SQLException {
         Categoria categoriaInvalida = new Categoria();
         categoriaInvalida.setDescricao("");
 
@@ -169,7 +167,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("POST /api/categorias - Deve retornar erro 500 quando ocorrer exceção")
-    void testCreateCategoria_Error() throws SQLException {
+    void testCreateCategoriaError() throws SQLException {
         when(categoriaService.createCategoria(any(Categoria.class)))
                 .thenThrow(new SQLException("Database error"));
 
@@ -181,7 +179,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("PUT /api/categorias/{id} - Deve atualizar categoria com sucesso")
-    void testUpdateCategoria_Success() throws SQLException {
+    void testUpdateCategoriaSuccess() throws SQLException {
         Categoria categoriaAtualizada = new Categoria();
         categoriaAtualizada.setDescricao("Eletrônicos Atualizados");
 
@@ -198,7 +196,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("PUT /api/categorias/{id} - Deve retornar erro 400 quando categoria não encontrada")
-    void testUpdateCategoria_NotFound() throws SQLException {
+    void testUpdateCategoriaNotFound() throws SQLException {
         Categoria categoriaAtualizada = new Categoria();
         categoriaAtualizada.setDescricao("Teste");
 
@@ -213,7 +211,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("PUT /api/categorias/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testUpdateCategoria_Error() throws SQLException {
+    void testUpdateCategoriaError() throws SQLException {
         doThrow(new SQLException("Database error"))
                 .when(categoriaService).updateCategoria(anyInt(), any(Categoria.class));
 
@@ -225,7 +223,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("DELETE /api/categorias/{id} - Deve deletar categoria com sucesso")
-    void testDeleteCategoria_Success() throws SQLException {
+    void testDeleteCategoriaSuccess() throws SQLException {
         when(categoriaService.deleteCategoria(1)).thenReturn(true);
 
         HttpResponse<?> response = categoriaController.deleteCategoria(1);
@@ -236,7 +234,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("DELETE /api/categorias/{id} - Deve retornar 404 quando categoria não encontrada")
-    void testDeleteCategoria_NotFound() throws SQLException {
+    void testDeleteCategoriaNotFound() throws SQLException {
         when(categoriaService.deleteCategoria(999)).thenReturn(false);
 
         HttpResponse<?> response = categoriaController.deleteCategoria(999);
@@ -247,7 +245,7 @@ class CategoriaControllerTest {
 
     @Test
     @DisplayName("DELETE /api/categorias/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testDeleteCategoria_Error() throws SQLException {
+    void testDeleteCategoriaError() throws SQLException {
         when(categoriaService.deleteCategoria(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = categoriaController.deleteCategoria(1);

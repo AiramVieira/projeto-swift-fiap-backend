@@ -50,7 +50,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products - Deve retornar todos os produtos com sucesso")
-    void testGetAllProducts_Success() throws SQLException {
+    void testGetAllProductsSuccess() throws SQLException {
         List<Product> products = new ArrayList<>();
         products.add(productMock);
         
@@ -60,7 +60,6 @@ class ProductControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Product> responseProducts = (List<Product>) response.body();
         assertEquals(1, responseProducts.size());
         verify(productService, times(1)).getAllProducts();
@@ -68,13 +67,12 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products - Deve retornar lista vazia quando não há produtos")
-    void testGetAllProducts_EmptyList() throws SQLException {
+    void testGetAllProductsEmptyList() throws SQLException {
         when(productService.getAllProducts()).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = productController.getAllProducts();
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        @SuppressWarnings("unchecked")
         List<Product> responseProducts = (List<Product>) response.body();
         assertTrue(responseProducts.isEmpty());
         verify(productService, times(1)).getAllProducts();
@@ -82,7 +80,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetAllProducts_Error() throws SQLException {
+    void testGetAllProductsError() throws SQLException {
         when(productService.getAllProducts()).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = productController.getAllProducts();
@@ -93,7 +91,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/{id} - Deve retornar produto por ID com sucesso")
-    void testGetProductById_Success() throws SQLException {
+    void testGetProductByIdSuccess() throws SQLException {
         when(productService.getProductById(1)).thenReturn(Optional.of(productMock));
 
         HttpResponse<?> response = productController.getProductById(1);
@@ -108,7 +106,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/{id} - Deve retornar 404 quando produto não encontrado")
-    void testGetProductById_NotFound() throws SQLException {
+    void testGetProductByIdNotFound() throws SQLException {
         when(productService.getProductById(999)).thenReturn(Optional.empty());
 
         HttpResponse<?> response = productController.getProductById(999);
@@ -119,7 +117,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetProductById_Error() throws SQLException {
+    void testGetProductByIdError() throws SQLException {
         when(productService.getProductById(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = productController.getProductById(1);
@@ -130,7 +128,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/categoria/{categoriaId} - Deve retornar produtos por categoria")
-    void testGetProductsByCategoria_Success() throws SQLException {
+    void testGetProductsByCategoriaSuccess() throws SQLException {
         List<Product> products = new ArrayList<>();
         products.add(productMock);
         
@@ -145,7 +143,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/categoria/{categoriaId} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetProductsByCategoria_Error() throws SQLException {
+    void testGetProductsByCategoriaError() throws SQLException {
         when(productService.getProductsByCategoria(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = productController.getProductsByCategoria(1);
@@ -156,7 +154,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/search - Deve buscar produtos por nome")
-    void testSearchProducts_Success() throws SQLException {
+    void testSearchProductsSuccess() throws SQLException {
         List<Product> products = new ArrayList<>();
         products.add(productMock);
         
@@ -171,7 +169,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/search - Deve retornar erro 400 quando nome está vazio")
-    void testSearchProducts_EmptyName() throws SQLException {
+    void testSearchProductsEmptyName() throws SQLException {
         HttpResponse<?> response = productController.searchProducts("");
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -180,7 +178,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/search - Deve retornar erro 400 quando nome é null")
-    void testSearchProducts_NullName() throws SQLException {
+    void testSearchProductsNullName() throws SQLException {
         HttpResponse<?> response = productController.searchProducts(null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -189,7 +187,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("GET /api/products/search - Deve retornar erro 500 quando ocorrer exceção")
-    void testSearchProducts_Error() throws SQLException {
+    void testSearchProductsError() throws SQLException {
         when(productService.searchProducts(anyString())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = productController.searchProducts("Notebook");
@@ -200,7 +198,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("POST /api/products - Deve criar produto com sucesso")
-    void testCreateProduct_Success() throws SQLException {
+    void testCreateProductSuccess() throws SQLException {
         Product novoProduto = new Product();
         novoProduto.setNome("Mouse Gamer");
         novoProduto.setCategoriaId(1);
@@ -228,7 +226,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("POST /api/products - Deve retornar erro 400 com dados inválidos")
-    void testCreateProduct_InvalidData() throws SQLException {
+    void testCreateProductInvalidData() throws SQLException {
         Product produtoInvalido = new Product();
         produtoInvalido.setNome("");
 
@@ -243,7 +241,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("POST /api/products - Deve retornar erro 500 quando ocorrer exceção")
-    void testCreateProduct_Error() throws SQLException {
+    void testCreateProductError() throws SQLException {
         when(productService.createProduct(any(Product.class)))
                 .thenThrow(new SQLException("Database error"));
 
@@ -255,7 +253,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("PUT /api/products/{id} - Deve atualizar produto com sucesso")
-    void testUpdateProduct_Success() throws SQLException {
+    void testUpdateProductSuccess() throws SQLException {
         Product produtoAtualizado = new Product();
         produtoAtualizado.setNome("Notebook Dell Atualizado");
         produtoAtualizado.setPreco(4000.00f);
@@ -273,7 +271,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("PUT /api/products/{id} - Deve retornar erro 400 quando produto não encontrado")
-    void testUpdateProduct_NotFound() throws SQLException {
+    void testUpdateProductNotFound() throws SQLException {
         Product produtoAtualizado = new Product();
         produtoAtualizado.setNome("Teste");
 
@@ -288,7 +286,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("PUT /api/products/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testUpdateProduct_Error() throws SQLException {
+    void testUpdateProductError() throws SQLException {
         doThrow(new SQLException("Database error"))
                 .when(productService).updateProduct(anyInt(), any(Product.class));
 
@@ -300,7 +298,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("DELETE /api/products/{id} - Deve deletar produto com sucesso")
-    void testDeleteProduct_Success() throws SQLException {
+    void testDeleteProductSuccess() throws SQLException {
         when(productService.deleteProduct(1)).thenReturn(true);
 
         HttpResponse<?> response = productController.deleteProduct(1);
@@ -311,7 +309,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("DELETE /api/products/{id} - Deve retornar 404 quando produto não encontrado")
-    void testDeleteProduct_NotFound() throws SQLException {
+    void testDeleteProductNotFound() throws SQLException {
         when(productService.deleteProduct(999)).thenReturn(false);
 
         HttpResponse<?> response = productController.deleteProduct(999);
@@ -322,7 +320,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("DELETE /api/products/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testDeleteProduct_Error() throws SQLException {
+    void testDeleteProductError() throws SQLException {
         when(productService.deleteProduct(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = productController.deleteProduct(1);

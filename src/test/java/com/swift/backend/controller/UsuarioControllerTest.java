@@ -49,7 +49,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios - Deve retornar todos os usuários com sucesso")
-    void testGetAllUsuarios_Success() throws SQLException {
+    void testGetAllUsuariosSuccess() throws SQLException {
         List<Usuario> usuarios = new ArrayList<>();
         usuarios.add(usuarioMock);
         
@@ -59,7 +59,6 @@ class UsuarioControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<Usuario> responseUsuarios = (List<Usuario>) response.body();
         assertEquals(1, responseUsuarios.size());
         verify(usuarioService, times(1)).getAllUsuarios();
@@ -67,13 +66,12 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios - Deve retornar lista vazia quando não há usuários")
-    void testGetAllUsuarios_EmptyList() throws SQLException {
+    void testGetAllUsuariosEmptyList() throws SQLException {
         when(usuarioService.getAllUsuarios()).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = usuarioController.getAllUsuarios();
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        @SuppressWarnings("unchecked")
         List<Usuario> responseUsuarios = (List<Usuario>) response.body();
         assertTrue(responseUsuarios.isEmpty());
         verify(usuarioService, times(1)).getAllUsuarios();
@@ -81,7 +79,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetAllUsuarios_Error() throws SQLException {
+    void testGetAllUsuariosError() throws SQLException {
         when(usuarioService.getAllUsuarios()).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = usuarioController.getAllUsuarios();
@@ -92,7 +90,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios/{id} - Deve retornar usuário por ID com sucesso")
-    void testGetUsuarioById_Success() throws SQLException {
+    void testGetUsuarioByIdSuccess() throws SQLException {
         when(usuarioService.getUsuarioById(1)).thenReturn(Optional.of(usuarioMock));
 
         HttpResponse<?> response = usuarioController.getUsuarioById(1);
@@ -107,7 +105,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios/{id} - Deve retornar 404 quando usuário não encontrado")
-    void testGetUsuarioById_NotFound() throws SQLException {
+    void testGetUsuarioByIdNotFound() throws SQLException {
         when(usuarioService.getUsuarioById(999)).thenReturn(Optional.empty());
 
         HttpResponse<?> response = usuarioController.getUsuarioById(999);
@@ -118,7 +116,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("GET /api/usuarios/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetUsuarioById_Error() throws SQLException {
+    void testGetUsuarioByIdError() throws SQLException {
         when(usuarioService.getUsuarioById(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = usuarioController.getUsuarioById(1);
@@ -129,7 +127,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("POST /api/usuarios - Deve criar usuário com sucesso")
-    void testCreateUsuario_Success() throws SQLException {
+    void testCreateUsuarioSuccess() throws SQLException {
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome("Maria");
         novoUsuario.setSobrenome("Santos");
@@ -159,7 +157,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("POST /api/usuarios - Deve retornar erro 400 com dados inválidos")
-    void testCreateUsuario_InvalidData() throws SQLException {
+    void testCreateUsuarioInvalidData() throws SQLException {
         Usuario usuarioInvalido = new Usuario();
         usuarioInvalido.setNome("");
 
@@ -174,7 +172,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("POST /api/usuarios - Deve retornar erro 500 quando ocorrer exceção")
-    void testCreateUsuario_Error() throws SQLException {
+    void testCreateUsuarioError() throws SQLException {
         when(usuarioService.createUsuario(any(Usuario.class)))
                 .thenThrow(new SQLException("Database error"));
 
@@ -186,7 +184,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("PUT /api/usuarios/{id} - Deve atualizar usuário com sucesso")
-    void testUpdateUsuario_Success() throws SQLException {
+    void testUpdateUsuarioSuccess() throws SQLException {
         Usuario usuarioAtualizado = new Usuario();
         usuarioAtualizado.setNome("João Atualizado");
         usuarioAtualizado.setSobrenome("Silva");
@@ -204,7 +202,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("PUT /api/usuarios/{id} - Deve retornar erro 400 quando usuário não encontrado")
-    void testUpdateUsuario_NotFound() throws SQLException {
+    void testUpdateUsuarioNotFound() throws SQLException {
         Usuario usuarioAtualizado = new Usuario();
         usuarioAtualizado.setNome("Teste");
 
@@ -219,7 +217,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("PUT /api/usuarios/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testUpdateUsuario_Error() throws SQLException {
+    void testUpdateUsuarioError() throws SQLException {
         doThrow(new SQLException("Database error"))
                 .when(usuarioService).updateUsuario(anyInt(), any(Usuario.class));
 
@@ -231,7 +229,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("DELETE /api/usuarios/{id} - Deve deletar usuário com sucesso")
-    void testDeleteUsuario_Success() throws SQLException {
+    void testDeleteUsuarioSuccess() throws SQLException {
         when(usuarioService.deleteUsuario(1)).thenReturn(true);
 
         HttpResponse<?> response = usuarioController.deleteUsuario(1);
@@ -242,7 +240,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("DELETE /api/usuarios/{id} - Deve retornar 404 quando usuário não encontrado")
-    void testDeleteUsuario_NotFound() throws SQLException {
+    void testDeleteUsuarioNotFound() throws SQLException {
         when(usuarioService.deleteUsuario(999)).thenReturn(false);
 
         HttpResponse<?> response = usuarioController.deleteUsuario(999);
@@ -253,7 +251,7 @@ class UsuarioControllerTest {
 
     @Test
     @DisplayName("DELETE /api/usuarios/{id} - Deve retornar erro 500 quando ocorrer exceção")
-    void testDeleteUsuario_Error() throws SQLException {
+    void testDeleteUsuarioError() throws SQLException {
         when(usuarioService.deleteUsuario(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = usuarioController.deleteUsuario(1);

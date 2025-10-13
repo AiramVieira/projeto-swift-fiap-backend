@@ -50,7 +50,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/usuario/{usuarioId} - Deve retornar carrinho por usuário")
-    void testGetCarrinhoByUsuarioId_Success() throws SQLException {
+    void testGetCarrinhoByUsuarioIdSuccess() throws SQLException {
         when(carrinhoService.getCarrinhoByUsuarioId(1)).thenReturn(Optional.of(carrinhoMock));
 
         HttpResponse<?> response = carrinhoController.getCarrinhoByUsuarioId(1);
@@ -64,7 +64,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/usuario/{usuarioId} - Deve retornar 404 quando carrinho não encontrado")
-    void testGetCarrinhoByUsuarioId_NotFound() throws SQLException {
+    void testGetCarrinhoByUsuarioIdNotFound() throws SQLException {
         when(carrinhoService.getCarrinhoByUsuarioId(999)).thenReturn(Optional.empty());
 
         HttpResponse<?> response = carrinhoController.getCarrinhoByUsuarioId(999);
@@ -75,7 +75,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/usuario/{usuarioId} - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetCarrinhoByUsuarioId_Error() throws SQLException {
+    void testGetCarrinhoByUsuarioIdError() throws SQLException {
         when(carrinhoService.getCarrinhoByUsuarioId(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = carrinhoController.getCarrinhoByUsuarioId(1);
@@ -86,7 +86,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("POST /api/carrinho/{usuarioId} - Deve criar carrinho com sucesso")
-    void testCreateCarrinho_Success() throws SQLException {
+    void testCreateCarrinhoSuccess() throws SQLException {
         when(carrinhoService.createCarrinho(1)).thenReturn(carrinhoMock);
 
         HttpResponse<?> response = carrinhoController.createCarrinho(1);
@@ -100,7 +100,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("POST /api/carrinho/{usuarioId} - Deve retornar erro 500 quando ocorrer exceção")
-    void testCreateCarrinho_Error() throws SQLException {
+    void testCreateCarrinhoError() throws SQLException {
         when(carrinhoService.createCarrinho(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = carrinhoController.createCarrinho(1);
@@ -111,7 +111,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/{carrinhoId}/itens - Deve retornar itens do carrinho")
-    void testGetItensDoCarrinho_Success() throws SQLException {
+    void testGetItensDoCarrinhoSuccess() throws SQLException {
         List<ItemDoCarrinho> itens = new ArrayList<>();
         itens.add(itemMock);
         
@@ -121,7 +121,6 @@ class CarrinhoControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
-        @SuppressWarnings("unchecked")
         List<ItemDoCarrinho> responseItens = (List<ItemDoCarrinho>) response.body();
         assertEquals(1, responseItens.size());
         verify(carrinhoService, times(1)).getItensDoCarrinho(1);
@@ -129,13 +128,12 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/{carrinhoId}/itens - Deve retornar lista vazia quando não há itens")
-    void testGetItensDoCarrinho_EmptyList() throws SQLException {
+    void testGetItensDoCarrinhoEmptyList() throws SQLException {
         when(carrinhoService.getItensDoCarrinho(1)).thenReturn(new ArrayList<>());
 
         HttpResponse<?> response = carrinhoController.getItensDoCarrinho(1);
 
         assertEquals(HttpStatus.OK, response.getStatus());
-        @SuppressWarnings("unchecked")
         List<ItemDoCarrinho> responseItens = (List<ItemDoCarrinho>) response.body();
         assertTrue(responseItens.isEmpty());
         verify(carrinhoService, times(1)).getItensDoCarrinho(1);
@@ -143,7 +141,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("GET /api/carrinho/{carrinhoId}/itens - Deve retornar erro 500 quando ocorrer exceção")
-    void testGetItensDoCarrinho_Error() throws SQLException {
+    void testGetItensDoCarrinhoError() throws SQLException {
         when(carrinhoService.getItensDoCarrinho(anyInt())).thenThrow(new SQLException("Database error"));
 
         HttpResponse<?> response = carrinhoController.getItensDoCarrinho(1);
@@ -154,7 +152,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("POST /api/carrinho/{carrinhoId}/itens/{itemId} - Deve adicionar item ao carrinho")
-    void testAdicionarItem_Success() throws SQLException {
+    void testAdicionarItemSuccess() throws SQLException {
         doNothing().when(carrinhoService).adicionarItemAoCarrinho(1, 1);
 
         HttpResponse<?> response = carrinhoController.adicionarItem(1, 1);
@@ -168,7 +166,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("POST /api/carrinho/{carrinhoId}/itens/{itemId} - Deve retornar erro 500 quando ocorrer exceção")
-    void testAdicionarItem_Error() throws SQLException {
+    void testAdicionarItemError() throws SQLException {
         doThrow(new SQLException("Database error")).when(carrinhoService).adicionarItemAoCarrinho(anyInt(), anyInt());
 
         HttpResponse<?> response = carrinhoController.adicionarItem(1, 1);
@@ -179,7 +177,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("DELETE /api/carrinho/{carrinhoId}/itens/{itemId} - Deve remover item do carrinho")
-    void testRemoverItem_Success() throws SQLException {
+    void testRemoverItemSuccess() throws SQLException {
         doNothing().when(carrinhoService).removerItemDoCarrinho(1, 1);
 
         HttpResponse<?> response = carrinhoController.removerItem(1, 1);
@@ -193,7 +191,7 @@ class CarrinhoControllerTest {
 
     @Test
     @DisplayName("DELETE /api/carrinho/{carrinhoId}/itens/{itemId} - Deve retornar erro 500 quando ocorrer exceção")
-    void testRemoverItem_Error() throws SQLException {
+    void testRemoverItemError() throws SQLException {
         doThrow(new SQLException("Database error")).when(carrinhoService).removerItemDoCarrinho(anyInt(), anyInt());
 
         HttpResponse<?> response = carrinhoController.removerItem(1, 1);

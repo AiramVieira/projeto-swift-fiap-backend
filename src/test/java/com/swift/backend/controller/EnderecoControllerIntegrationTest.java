@@ -1,6 +1,7 @@
 package com.swift.backend.controller;
 
 import com.swift.backend.model.Endereco;
+import com.swift.backend.model.ErrorResponse;
 import com.swift.backend.service.EnderecoService;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -23,7 +24,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -47,7 +47,6 @@ class EnderecoControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Criar um endereço mock para os testes
         enderecoMock = new Endereco();
         enderecoMock.setId(1);
         enderecoMock.setDescricao("Rua das Flores, 123 - Centro");
@@ -58,8 +57,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /api/enderecos - Deve retornar todos os endereços com sucesso")
-    void testGetAllEnderecos_Success() throws SQLException {
-        // Arrange
+    void testGetAllEnderecosSuccess() throws SQLException {
         List<Endereco> enderecos = new ArrayList<>();
         enderecos.add(enderecoMock);
         
@@ -73,11 +71,9 @@ class EnderecoControllerIntegrationTest {
         
         when(enderecoService.getAllEnderecos()).thenReturn(enderecos);
 
-        // Act
         HttpRequest<Object> request = HttpRequest.GET("/api/enderecos");
         HttpResponse<List> response = client.toBlocking().exchange(request, List.class);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
         assertEquals(2, response.body().size());
@@ -86,15 +82,12 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /api/enderecos - Deve retornar lista vazia quando não há endereços")
-    void testGetAllEnderecos_EmptyList() throws SQLException {
-        // Arrange
+    void testGetAllEnderecosEmptyList() throws SQLException {
         when(enderecoService.getAllEnderecos()).thenReturn(new ArrayList<>());
 
-        // Act
         HttpRequest<Object> request = HttpRequest.GET("/api/enderecos");
         HttpResponse<List> response = client.toBlocking().exchange(request, List.class);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
         assertTrue(response.body().isEmpty());
@@ -103,15 +96,12 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /api/enderecos/{id} - Deve retornar endereço por ID com sucesso")
-    void testGetEnderecoById_Success() throws SQLException {
-        // Arrange
+    void testGetEnderecoByIdSuccess() throws SQLException {
         when(enderecoService.getEnderecoById(1)).thenReturn(Optional.of(enderecoMock));
 
-        // Act
         HttpRequest<Object> request = HttpRequest.GET("/api/enderecos/1");
         HttpResponse<Endereco> response = client.toBlocking().exchange(request, Endereco.class);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.body());
         assertEquals(1, response.body().getId());
@@ -122,11 +112,9 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /api/enderecos/{id} - Deve retornar 404 quando endereço não encontrado")
-    void testGetEnderecoById_NotFound() throws SQLException {
-        // Arrange
+    void testGetEnderecoByIdNotFound() throws SQLException {
         when(enderecoService.getEnderecoById(999)).thenReturn(Optional.empty());
 
-        // Act & Assert
         HttpRequest<Object> request = HttpRequest.GET("/api/enderecos/999");
         HttpClientResponseException exception = assertThrows(
             HttpClientResponseException.class,
@@ -139,8 +127,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("POST /api/enderecos - Deve criar endereço com sucesso")
-    void testCreateEndereco_Success() throws SQLException {
-        // Arrange
+    void testCreateEnderecoSuccess() throws SQLException {
         Endereco novoEndereco = new Endereco();
         novoEndereco.setDescricao("Rua Nova, 456");
         novoEndereco.setCep("12345-678");
@@ -156,11 +143,9 @@ class EnderecoControllerIntegrationTest {
 
         when(enderecoService.createEndereco(any(Endereco.class))).thenReturn(enderecoSalvo);
 
-        // Act
         HttpRequest<Endereco> request = HttpRequest.POST("/api/enderecos", novoEndereco);
         HttpResponse<Endereco> response = client.toBlocking().exchange(request, Endereco.class);
 
-        // Assert
         assertEquals(HttpStatus.CREATED, response.getStatus());
         assertNotNull(response.body());
         assertEquals(3, response.body().getId());
@@ -170,8 +155,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("POST /api/enderecos - Deve retornar erro 400 com dados inválidos")
-    void testCreateEndereco_InvalidData() throws SQLException {
-        // Arrange
+    void testCreateEnderecoInvalidData() throws SQLException {
         Endereco enderecoInvalido = new Endereco();
         enderecoInvalido.setDescricao("");
         enderecoInvalido.setCep("");
@@ -179,7 +163,6 @@ class EnderecoControllerIntegrationTest {
         when(enderecoService.createEndereco(any(Endereco.class)))
                 .thenThrow(new IllegalArgumentException("Descrição do endereço é obrigatória"));
 
-        // Act & Assert
         HttpRequest<Endereco> request = HttpRequest.POST("/api/enderecos", enderecoInvalido);
         HttpClientResponseException exception = assertThrows(
             HttpClientResponseException.class,
@@ -192,8 +175,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("PUT /api/enderecos/{id} - Deve atualizar endereço com sucesso")
-    void testUpdateEndereco_Success() throws SQLException {
-        // Arrange
+    void testUpdateEnderecoSuccess() throws SQLException {
         Endereco enderecoAtualizado = new Endereco();
         enderecoAtualizado.setDescricao("Rua Atualizada, 789");
         enderecoAtualizado.setCep("98765-432");
@@ -202,20 +184,19 @@ class EnderecoControllerIntegrationTest {
 
         doNothing().when(enderecoService).updateEndereco(eq(1), any(Endereco.class));
 
-        // Act
         HttpRequest<Endereco> request = HttpRequest.PUT("/api/enderecos/1", enderecoAtualizado);
-        HttpResponse<String> response = client.toBlocking().exchange(request, String.class);
+        HttpResponse<ErrorResponse> response = client.toBlocking().exchange(request, ErrorResponse.class);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatus());
-        assertEquals("Endereço atualizado com sucesso", response.body());
+        assertNotNull(response.body());
+        assertEquals("Endereço atualizado com sucesso", response.body().getMessage());
+        assertEquals("SUCCESS", response.body().getError());
         verify(enderecoService, times(1)).updateEndereco(eq(1), any(Endereco.class));
     }
 
     @Test
     @DisplayName("PUT /api/enderecos/{id} - Deve retornar erro 400 quando endereço não encontrado")
-    void testUpdateEndereco_NotFound() throws SQLException {
-        // Arrange
+    void testUpdateEnderecoNotFound() throws SQLException {
         Endereco enderecoAtualizado = new Endereco();
         enderecoAtualizado.setDescricao("Rua Atualizada, 789");
         enderecoAtualizado.setCep("98765-432");
@@ -223,11 +204,10 @@ class EnderecoControllerIntegrationTest {
         doThrow(new IllegalArgumentException("Endereço não encontrado com id: 999"))
                 .when(enderecoService).updateEndereco(eq(999), any(Endereco.class));
 
-        // Act & Assert
         HttpRequest<Endereco> request = HttpRequest.PUT("/api/enderecos/999", enderecoAtualizado);
         HttpClientResponseException exception = assertThrows(
             HttpClientResponseException.class,
-            () -> client.toBlocking().exchange(request, String.class)
+            () -> client.toBlocking().exchange(request, ErrorResponse.class)
         );
         
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
@@ -236,8 +216,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("PUT /api/enderecos/{id} - Deve retornar erro 400 com dados inválidos")
-    void testUpdateEndereco_InvalidData() throws SQLException {
-        // Arrange
+    void testUpdateEnderecoInvalidData() throws SQLException {
         Endereco enderecoInvalido = new Endereco();
         enderecoInvalido.setDescricao("");
         enderecoInvalido.setCep("");
@@ -245,11 +224,10 @@ class EnderecoControllerIntegrationTest {
         doThrow(new IllegalArgumentException("Descrição do endereço é obrigatória"))
                 .when(enderecoService).updateEndereco(eq(1), any(Endereco.class));
 
-        // Act & Assert
         HttpRequest<Endereco> request = HttpRequest.PUT("/api/enderecos/1", enderecoInvalido);
         HttpClientResponseException exception = assertThrows(
             HttpClientResponseException.class,
-            () -> client.toBlocking().exchange(request, String.class)
+            () -> client.toBlocking().exchange(request, ErrorResponse.class)
         );
         
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
@@ -258,8 +236,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("POST /api/enderecos - Deve aceitar endereço com coordenadas nulas")
-    void testCreateEndereco_NullCoordinates() throws SQLException {
-        // Arrange
+    void testCreateEnderecoNullCoordinates() throws SQLException {
         Endereco enderecoSemCoordenadas = new Endereco();
         enderecoSemCoordenadas.setDescricao("Rua sem coordenadas");
         enderecoSemCoordenadas.setCep("00000-000");
@@ -271,11 +248,9 @@ class EnderecoControllerIntegrationTest {
 
         when(enderecoService.createEndereco(any(Endereco.class))).thenReturn(enderecoSalvo);
 
-        // Act
         HttpRequest<Endereco> request = HttpRequest.POST("/api/enderecos", enderecoSemCoordenadas);
         HttpResponse<Endereco> response = client.toBlocking().exchange(request, Endereco.class);
 
-        // Assert
         assertEquals(HttpStatus.CREATED, response.getStatus());
         assertNotNull(response.body());
         assertEquals("Rua sem coordenadas", response.body().getDescricao());
@@ -286,8 +261,7 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("GET /api/enderecos/{id} - Deve aceitar diferentes tipos de IDs válidos")
-    void testGetEnderecoById_DifferentIds() throws SQLException {
-        // Test com ID 100
+    void testGetEnderecoByIdDifferentIds() throws SQLException {
         Endereco endereco100 = new Endereco();
         endereco100.setId(100);
         endereco100.setDescricao("Endereço 100");
@@ -305,16 +279,14 @@ class EnderecoControllerIntegrationTest {
 
     @Test
     @DisplayName("POST /api/enderecos - Deve validar formato do CEP")
-    void testCreateEndereco_InvalidCep() throws SQLException {
-        // Arrange
+    void testCreateEnderecoInvalidCep() throws SQLException {
         Endereco enderecoComCepInvalido = new Endereco();
         enderecoComCepInvalido.setDescricao("Rua com CEP inválido");
-        enderecoComCepInvalido.setCep(""); // CEP vazio
+        enderecoComCepInvalido.setCep("");
 
         when(enderecoService.createEndereco(any(Endereco.class)))
                 .thenThrow(new IllegalArgumentException("CEP é obrigatório"));
 
-        // Act & Assert
         HttpRequest<Endereco> request = HttpRequest.POST("/api/enderecos", enderecoComCepInvalido);
         HttpClientResponseException exception = assertThrows(
             HttpClientResponseException.class,
@@ -325,4 +297,3 @@ class EnderecoControllerIntegrationTest {
         verify(enderecoService, times(1)).createEndereco(any(Endereco.class));
     }
 }
-
