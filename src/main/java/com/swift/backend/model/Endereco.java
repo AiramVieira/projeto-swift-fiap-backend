@@ -1,16 +1,18 @@
 package com.swift.backend.model;
 
+import java.math.BigDecimal;
+
 public class Endereco {
     private Integer id;
     private String descricao;
     private String cep;
-    private Integer latitude;
-    private Integer longitude;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     public Endereco() {
     }
 
-    public Endereco(Integer id, String descricao, String cep, Integer latitude, Integer longitude) {
+    public Endereco(Integer id, String descricao, String cep, BigDecimal latitude, BigDecimal longitude) {
         this.id = id;
         this.descricao = descricao;
         this.cep = cep;
@@ -42,19 +44,19 @@ public class Endereco {
         this.cep = cep;
     }
 
-    public Integer getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Integer latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public Integer getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Integer longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 }

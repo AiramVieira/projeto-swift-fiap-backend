@@ -2,9 +2,11 @@ package com.swift.backend.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,25 +51,22 @@ public class EnderecoDAO {
     }
 
     public Endereco save(Endereco endereco) throws SQLException {
-        String sql = "INSERT INTO endereco (descricao, cep, latitude, longitude) VALUES (?, ?, ?, ?)";
-        
+        // Oracle JDBC nem sempre suporta getGeneratedKeys; usar RETURNING INTO garante o id
+        String sql = "BEGIN INSERT INTO endereco (descricao, cep, latitude, longitude) VALUES (?, ?, ?, ?) RETURNING id INTO ?; END;";
+
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            statement.setString(1, endereco.getDescricao());
-            statement.setString(2, endereco.getCep());
-            statement.setObject(3, endereco.getLatitude());
-            statement.setObject(4, endereco.getLongitude());
-            
-            statement.executeUpdate();
-            
-            try (ResultSet rs = statement.getGeneratedKeys()) {
-                if (rs.next()) {
-                    endereco.setId(rs.getInt(1));
-                }
-            }
+             CallableStatement callable = conn.prepareCall(sql)) {
+
+            callable.setString(1, endereco.getDescricao());
+            callable.setString(2, endereco.getCep());
+            callable.setBigDecimal(3, endereco.getLatitude());
+            callable.setBigDecimal(4, endereco.getLongitude());
+            callable.registerOutParameter(5, Types.INTEGER);
+
+            callable.execute();
+            endereco.setId(callable.getInt(5));
         }
-        
+
         return endereco;
     }
 
@@ -92,8 +91,8 @@ public class EnderecoDAO {
         endereco.setId(rs.getInt("id"));
         endereco.setDescricao(rs.getString("descricao"));
         endereco.setCep(rs.getString("cep"));
-        endereco.setLatitude((Integer) rs.getObject("latitude"));
-        endereco.setLongitude((Integer) rs.getObject("longitude"));
+        endereco.setLatitude(rs.getBigDecimal("latitude"));
+        endereco.setLongitude(rs.getBigDecimal("longitude"));
         return endereco;
     }
 }
