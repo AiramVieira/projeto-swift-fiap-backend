@@ -53,6 +53,9 @@ public class UsuarioService {
         if (usuario.getSobrenome() == null || usuario.getSobrenome().trim().isEmpty()) {
             throw new IllegalArgumentException("Sobrenome é obrigatório");
         }
+        if (usuario.getEnderecoId() == null || usuario.getEnderecoId() <= 0) {
+            throw new IllegalArgumentException("ID do endereço é obrigatório e deve ser maior que zero");
+        }
         if (usuario.getTipo() == null || (!usuario.getTipo().equals("PF") && !usuario.getTipo().equals("PJ"))) {
             throw new IllegalArgumentException("Tipo deve ser PF ou PJ");
         }
