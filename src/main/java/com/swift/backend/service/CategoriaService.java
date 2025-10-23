@@ -1,50 +1,60 @@
 package com.swift.backend.service;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.swift.backend.dao.CategoriaDAO;
-import com.swift.backend.model.Categoria;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.swift.backend.model.Categoria;
+import com.swift.backend.repository.CategoriaRepository;
+
+@Service
 public class CategoriaService {
     
-    private final CategoriaDAO categoriaDAO;
+    @Autowired
+    private CategoriaRepository categoriaRepository;
 
-    public CategoriaService() {
-        this.categoriaDAO = new CategoriaDAO();
+    public List<Categoria> getAllCategorias() {
+        return categoriaRepository.findAll();
     }
 
-    public List<Categoria> getAllCategorias() throws SQLException {
-        return categoriaDAO.findAll();
+    public Optional<Categoria> getCategoriaById(Integer id) {
+        return categoriaRepository.findById(id);
     }
 
-    public Optional<Categoria> getCategoriaById(Integer id) throws SQLException {
-        return categoriaDAO.findById(id);
-    }
-
-    public Categoria createCategoria(Categoria categoria) throws SQLException {
-        if (categoria.getDescricao() == null || categoria.getDescricao().trim().isEmpty()) {
-            throw new IllegalArgumentException("Descrição da categoria é obrigatória");
+    public Categoria createCategoria(Categoria categoria) {
+        if (categoria.getNmCategoria() == null || categoria.getNmCategoria().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome da categoria é obrigatório");
         }
-        return categoriaDAO.save(categoria);
+        if (categoria.getTpCategoria() == null) {
+            throw new IllegalArgumentException("Tipo da categoria é obrigatório");
+        }
+        return categoriaRepository.save(categoria);
     }
 
-    public void updateCategoria(Integer id, Categoria categoria) throws SQLException {
-        Optional<Categoria> existing = categoriaDAO.findById(id);
+    public void updateCategoria(Integer id, Categoria categoria) {
+        Optional<Categoria> existing = categoriaRepository.findById(id);
         if (existing.isEmpty()) {
             throw new IllegalArgumentException("Categoria não encontrada com id: " + id);
         }
         
-        categoria.setId(id);
-        if (categoria.getDescricao() == null || categoria.getDescricao().trim().isEmpty()) {
-            throw new IllegalArgumentException("Descrição da categoria é obrigatória");
+        categoria.setCdCategoria(id);
+        if (categoria.getNmCategoria() == null || categoria.getNmCategoria().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome da categoria é obrigatório");
         }
-        categoriaDAO.update(categoria);
+        if (categoria.getTpCategoria() == null) {
+            throw new IllegalArgumentException("Tipo da categoria é obrigatório");
+        }
+        categoriaRepository.save(categoria);
     }
 
-    public boolean deleteCategoria(Integer id) throws SQLException {
-        return categoriaDAO.delete(id);
+    public boolean deleteCategoria(Integer id) {
+        if (categoriaRepository.existsById(id)) {
+            categoriaRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
 

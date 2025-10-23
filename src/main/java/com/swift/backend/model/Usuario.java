@@ -1,71 +1,108 @@
 package com.swift.backend.model;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "t_fin_usuario")
 public class Usuario {
-    private Integer id;
-    private String nome;
-    private String sobrenome;
-    private Integer enderecoId;
-    private String telephone;
-    private String tipo;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cd_usuario")
+    private Integer cdUsuario;
+    
+    @Column(name = "cd_autenticacao")
+    private Integer cdAutenticacao;
+    
+    @Column(name = "nm_usuario", nullable = false)
+    private String nmUsuario;
+    
+    @Column(name = "dt_nascimento", nullable = false)
+    private LocalDate dtNascimento;
+    
+    @Column(name = "nr_telefone")
+    private String nrTelefone;
+    
+    @Column(name = "ativo")
+    private Character ativo;
+    
+    @Column(name = "vl_saldo", nullable = false)
+    private Double vlSaldo;
 
     public Usuario() {
     }
 
-    public Usuario(Integer id, String nome, String sobrenome, Integer enderecoId, String telephone, String tipo) {
-        this.id = id;
-        this.nome = nome;
-        this.sobrenome = sobrenome;
-        this.enderecoId = enderecoId;
-        this.telephone = telephone;
-        this.tipo = tipo;
+    public Usuario(Integer cdUsuario, Integer cdAutenticacao, String nmUsuario, LocalDate dtNascimento, String nrTelefone, Character ativo, Double vlSaldo) {
+        this.cdUsuario = cdUsuario;
+        this.cdAutenticacao = cdAutenticacao;
+        this.nmUsuario = nmUsuario;
+        this.dtNascimento = dtNascimento;
+        this.nrTelefone = nrTelefone;
+        this.ativo = ativo;
+        this.vlSaldo = vlSaldo;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getCdUsuario() {
+        return cdUsuario;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setCdUsuario(Integer cdUsuario) {
+        this.cdUsuario = cdUsuario;
     }
 
-    public String getNome() {
-        return nome;
+    public Integer getCdAutenticacao() {
+        return cdAutenticacao;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setCdAutenticacao(Integer cdAutenticacao) {
+        this.cdAutenticacao = cdAutenticacao;
     }
 
-    public String getSobrenome() {
-        return sobrenome;
+    public String getNmUsuario() {
+        return nmUsuario;
     }
 
-    public void setSobrenome(String sobrenome) {
-        this.sobrenome = sobrenome;
+    public void setNmUsuario(String nmUsuario) {
+        this.nmUsuario = nmUsuario;
     }
 
-    public Integer getEnderecoId() {
-        return enderecoId;
+    public LocalDate getDtNascimento() {
+        return dtNascimento;
     }
 
-    public void setEnderecoId(Integer enderecoId) {
-        this.enderecoId = enderecoId;
+    public void setDtNascimento(LocalDate dtNascimento) {
+        this.dtNascimento = dtNascimento;
     }
 
-    public String getTelephone() {
-        return telephone;
+    public String getNrTelefone() {
+        return nrTelefone;
     }
 
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
+    public void setNrTelefone(String nrTelefone) {
+        this.nrTelefone = nrTelefone;
     }
 
-    public String getTipo() {
-        return tipo;
+    public Character getAtivo() {
+        return ativo;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setAtivo(Character ativo) {
+        this.ativo = ativo;
+    }
+
+    public Double getVlSaldo() {
+        return vlSaldo;
+    }
+
+    public void setVlSaldo(Double vlSaldo) {
+        this.vlSaldo = vlSaldo;
     }
 }
 

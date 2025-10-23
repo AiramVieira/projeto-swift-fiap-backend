@@ -1,27 +1,58 @@
 package com.swift.backend.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "t_fin_autenticacao")
 public class Autenticacao {
-    private Integer id;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cd_autenticacao")
+    private Integer cdAutenticacao;
+    
+    @Column(name = "cd_usuario", nullable = false)
+    private Integer cdUsuario;
+    
+    @Column(name = "email", nullable = false)
     private String email;
+    
+    @Column(name = "senha", nullable = false)
     private String senha;
-    private Integer usuarioId;
+    
+    @Column(name = "status_conta", nullable = false)
+    private String statusConta;
 
     public Autenticacao() {
     }
 
-    public Autenticacao(Integer id, String email, String senha, Integer usuarioId) {
-        this.id = id;
+    public Autenticacao(Integer cdAutenticacao, Integer cdUsuario, String email, String senha, String statusConta) {
+        this.cdAutenticacao = cdAutenticacao;
+        this.cdUsuario = cdUsuario;
         this.email = email;
         this.senha = senha;
-        this.usuarioId = usuarioId;
+        this.statusConta = statusConta;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getCdAutenticacao() {
+        return cdAutenticacao;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setCdAutenticacao(Integer cdAutenticacao) {
+        this.cdAutenticacao = cdAutenticacao;
+    }
+
+    public Integer getCdUsuario() {
+        return cdUsuario;
+    }
+
+    public void setCdUsuario(Integer cdUsuario) {
+        this.cdUsuario = cdUsuario;
     }
 
     public String getEmail() {
@@ -40,12 +71,11 @@ public class Autenticacao {
         this.senha = senha;
     }
 
-    public Integer getUsuarioId() {
-        return usuarioId;
+    public String getStatusConta() {
+        return statusConta;
     }
 
-    public void setUsuarioId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setStatusConta(String statusConta) {
+        this.statusConta = statusConta;
     }
 }
-

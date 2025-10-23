@@ -3,95 +3,83 @@ package com.swift.backend.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.swift.backend.model.Categoria;
 import com.swift.backend.service.CategoriaService;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
-
+@RestController
+@RequestMapping("/api/categorias")
+@CrossOrigin(origins = "*")
 public class CategoriaController {
 
-    private final CategoriaService categoriaService;
+    @Autowired
+    private CategoriaService categoriaService;
 
-    public CategoriaController() {
-        this.categoriaService = new CategoriaService();
-    }
-
-    public void registerRoutes(Javalin app) {
-        app.get("/api/categorias", this::getAllCategorias);
-        app.get("/api/categorias/{id}", this::getCategoriaById);
-        app.post("/api/categorias", this::createCategoria);
-        app.put("/api/categorias/{id}", this::updateCategoria);
-        app.delete("/api/categorias/{id}", this::deleteCategoria);
-    }
-
-    private void getAllCategorias(Context ctx) {
+    @GetMapping
+    public ResponseEntity<List<Categoria>> getAllCategorias() {
         try {
             List<Categoria> categorias = categoriaService.getAllCategorias();
-            ctx.json(categorias);
+            return ResponseEntity.ok(categorias);
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar categorias: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private void getCategoriaById(Context ctx) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Categoria> getCategoriaById(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Categoria> categoria = categoriaService.getCategoriaById(id);
             
             if (categoria.isPresent()) {
-                ctx.json(categoria.get());
+                return ResponseEntity.ok(categoria.get());
             } else {
-                ctx.status(404).result("Categoria não encontrada");
+                return ResponseEntity.notFound().build();
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao buscar categoria: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private void createCategoria(Context ctx) {
+    @PostMapping
+    public ResponseEntity<Categoria> createCategoria(@RequestBody Categoria categoria) {
         try {
-            Categoria categoria = ctx.bodyAsClass(Categoria.class);
             Categoria created = categoriaService.createCategoria(categoria);
-            ctx.status(201).json(created);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao criar categoria: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private void updateCategoria(Context ctx) {
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateCategoria(@PathVariable Integer id, @RequestBody Categoria categoria) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
-            Categoria categoria = ctx.bodyAsClass(Categoria.class);
             categoriaService.updateCategoria(id, categoria);
-            ctx.status(200).result("Categoria atualizada com sucesso");
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
+            return ResponseEntity.ok("Categoria atualizada com sucesso");
         } catch (IllegalArgumentException e) {
-            ctx.status(400).result(e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao atualizar categoria: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private void deleteCategoria(Context ctx) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategoria(@PathVariable Integer id) {
         try {
-            Integer id = Integer.parseInt(ctx.pathParam("id"));
             boolean deleted = categoriaService.deleteCategoria(id);
             
             if (deleted) {
-                ctx.status(204);
+                return ResponseEntity.noContent().build();
             } else {
-                ctx.status(404).result("Categoria não encontrada");
+                return ResponseEntity.notFound().build();
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400).result("ID inválido");
         } catch (Exception e) {
-            ctx.status(500).result("Erro ao deletar categoria: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

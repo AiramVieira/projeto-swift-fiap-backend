@@ -1,57 +1,61 @@
 package com.swift.backend.service;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import com.swift.backend.dao.UsuarioDAO;
-import com.swift.backend.model.Usuario;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.swift.backend.model.Usuario;
+import com.swift.backend.repository.UsuarioRepository;
+
+@Service
 public class UsuarioService {
     
-    private final UsuarioDAO usuarioDAO;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public UsuarioService() {
-        this.usuarioDAO = new UsuarioDAO();
+    public List<Usuario> getAllUsuarios()  {
+        return usuarioRepository.findAll();
     }
 
-    public List<Usuario> getAllUsuarios() throws SQLException {
-        return usuarioDAO.findAll();
+    public Optional<Usuario> getUsuarioById(Integer id)  {
+        return usuarioRepository.findById(id);
     }
 
-    public Optional<Usuario> getUsuarioById(Integer id) throws SQLException {
-        return usuarioDAO.findById(id);
-    }
-
-    public Usuario createUsuario(Usuario usuario) throws SQLException {
+    public Usuario createUsuario(Usuario usuario)  {
         validateUsuario(usuario);
-        return usuarioDAO.save(usuario);
+        return usuarioRepository.save(usuario);
     }
 
-    public void updateUsuario(Integer id, Usuario usuario) throws SQLException {
-        Optional<Usuario> existing = usuarioDAO.findById(id);
+    public void updateUsuario(Integer id, Usuario usuario)  {
+        Optional<Usuario> existing = usuarioRepository.findById(id);
         if (existing.isEmpty()) {
             throw new IllegalArgumentException("Usuário não encontrado com id: " + id);
         }
         
-        usuario.setId(id);
+        usuario.setCdUsuario(id);
         validateUsuario(usuario);
-        usuarioDAO.update(usuario);
+        usuarioRepository.save(usuario);
     }
 
-    public boolean deleteUsuario(Integer id) throws SQLException {
-        return usuarioDAO.delete(id);
+    public boolean deleteUsuario(Integer id)  {
+        if (usuarioRepository.existsById(id)) {
+            usuarioRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     private void validateUsuario(Usuario usuario) throws IllegalArgumentException {
-        if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome é obrigatório");
+        if (usuario.getNmUsuario() == null || usuario.getNmUsuario().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome do usuário é obrigatório");
         }
-        if (usuario.getSobrenome() == null || usuario.getSobrenome().trim().isEmpty()) {
-            throw new IllegalArgumentException("Sobrenome é obrigatório");
+        if (usuario.getDtNascimento() == null) {
+            throw new IllegalArgumentException("Data de nascimento é obrigatória");
         }
-        if (usuario.getTipo() == null || (!usuario.getTipo().equals("PF") && !usuario.getTipo().equals("PJ"))) {
-            throw new IllegalArgumentException("Tipo deve ser PF ou PJ");
+        if (usuario.getVlSaldo() == null) {
+            usuario.setVlSaldo(0.0);
         }
     }
 }
