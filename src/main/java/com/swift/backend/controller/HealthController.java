@@ -1,5 +1,6 @@
 package com.swift.backend.controller;
 
+<<<<<<< HEAD
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,3 +35,27 @@ public class HealthController {
         }
     }
 }
+=======
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+
+import java.util.Map;
+
+@Controller
+public class HealthController {
+
+    @Get("/")
+    public String index() {
+        return "Swift Backend API - Sistema de Loja Online";
+    }
+
+    @Get("/health")
+    public Map<String, String> health() {
+        return Map.of(
+            "status", "UP",
+            "message", "API está funcionando"
+        );
+    }
+}
+
+>>>>>>> 64a77131b5ede24b0fc69f28b922c7d231c94237

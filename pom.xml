@@ -23,6 +23,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <micronaut.version>4.2.0</micronaut.version>
+        <micronaut.runtime>netty</micronaut.runtime>
+        <exec.mainClass>com.swift.backend.Application</exec.mainClass>
     </properties>
 
     <dependencies>
