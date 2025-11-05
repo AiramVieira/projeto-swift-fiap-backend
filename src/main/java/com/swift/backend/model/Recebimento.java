@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,7 +15,8 @@ import jakarta.persistence.Table;
 public class Recebimento {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_recebimento")
+    @SequenceGenerator(name = "seq_recebimento", sequenceName = "seq_recebimento", allocationSize = 1)
     @Column(name = "cd_recebimento")
     private Integer cdRecebimento;
     
@@ -30,7 +32,7 @@ public class Recebimento {
     @Column(name = "dt_recebimento", nullable = false)
     private LocalDate dtRecebimento;
     
-    @Column(name = "vl_recebimento", nullable = false)
+    @Column(name = "vl_recebimento", nullable = false, columnDefinition = "NUMBER(12,2)")
     private Double vlRecebimento;
     
     @Column(name = "ds_recebimento")

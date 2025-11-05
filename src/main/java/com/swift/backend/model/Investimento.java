@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,7 +15,8 @@ import jakarta.persistence.Table;
 public class Investimento {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_investimento")
+    @SequenceGenerator(name = "seq_investimento", sequenceName = "seq_investimento", allocationSize = 1)
     @Column(name = "cd_investimento")
     private Integer cdInvestimento;
     
@@ -24,13 +26,13 @@ public class Investimento {
     @Column(name = "cd_tipo", nullable = false)
     private Integer cdTipo;
     
-    @Column(name = "vl_investimento", nullable = false)
+    @Column(name = "vl_investimento", nullable = false, columnDefinition = "NUMBER(12,2)")
     private Double vlInvestimento;
     
     @Column(name = "dt_investimento", nullable = false)
     private LocalDate dtInvestimento;
     
-    @Column(name = "rentabilidade_estimada")
+    @Column(name = "rentabilidade_estimada", columnDefinition = "NUMBER(12,2)")
     private Double rentabilidadeEstimada;
     
     @Column(name = "dt_vencimento")

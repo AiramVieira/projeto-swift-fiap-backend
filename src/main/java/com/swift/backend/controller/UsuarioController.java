@@ -1,5 +1,6 @@
 package com.swift.backend.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.swift.backend.model.Gasto;
+import com.swift.backend.model.Recebimento;
 import com.swift.backend.model.Usuario;
+import com.swift.backend.service.GastoService;
+import com.swift.backend.service.RecebimentoService;
 import com.swift.backend.service.UsuarioService;
 
 @RestController
@@ -26,6 +31,12 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private RecebimentoService recebimentoService;
+
+    @Autowired
+    private GastoService gastoService;
 
     @GetMapping
     public ResponseEntity<List<Usuario>> getAllUsuarios() {
@@ -86,6 +97,21 @@ public class UsuarioController {
             } else {
                 return ResponseEntity.notFound().build();
             }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<List<Object>> getHistoricoById(@PathVariable Integer id) {
+        try {
+            List<Recebimento> recebimentos = recebimentoService.getRecebimentosByUsuario(id);
+            List<Gasto> gastos = gastoService.getGastosByUsuario(id);
+            
+            List<Object> historico = new ArrayList<Object>();
+            historico.addAll(recebimentos);
+            historico.addAll(gastos);
+            return ResponseEntity.ok((List<Object>) historico);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -1,7 +1,6 @@
 package com.swift.backend.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.swift.backend.model.Autenticacao;
@@ -37,17 +37,20 @@ public class AutenticacaoController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Autenticacao> getAutenticacaoById(@PathVariable Integer id) {
+    @GetMapping("/buscar")
+    public ResponseEntity<Integer> getAutenticacaoByEmailAndSenha(
+            @RequestParam String email, 
+            @RequestParam String senha) {
         try {
-            Optional<Autenticacao> autenticacao = autenticacaoService.getAutenticacaoById(id);
-            
-            if (autenticacao.isPresent()) {
-                return ResponseEntity.ok(autenticacao.get());
+            Integer autenticacaoAtiva = autenticacaoService.getCdUsuarioByEmailAndSenha(email, senha);
+            System.out.println("AutenticacaoAtiva: " + autenticacaoAtiva);
+            if (autenticacaoAtiva != null) {
+                return ResponseEntity.ok(autenticacaoAtiva);
             } else {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -55,6 +58,7 @@ public class AutenticacaoController {
     @PostMapping
     public ResponseEntity<Autenticacao> createAutenticacao(@RequestBody Autenticacao autenticacao) {
         try {
+            autenticacao.setStatusConta("ATIVO");
             Autenticacao created = autenticacaoService.createAutenticacao(autenticacao);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {

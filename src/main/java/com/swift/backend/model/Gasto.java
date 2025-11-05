@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,7 +15,8 @@ import jakarta.persistence.Table;
 public class Gasto {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_gasto")
+    @SequenceGenerator(name = "seq_gasto", sequenceName = "seq_gasto", allocationSize = 1)
     @Column(name = "cd_gasto")
     private Integer cdGasto;
     
@@ -30,7 +32,7 @@ public class Gasto {
     @Column(name = "dt_gasto", nullable = false)
     private LocalDate dtGasto;
     
-    @Column(name = "vl_gasto", nullable = false)
+    @Column(name = "vl_gasto", nullable = false, columnDefinition = "NUMBER(12,2)")
     private Double vlGasto;
     
     @Column(name = "ds_gasto")

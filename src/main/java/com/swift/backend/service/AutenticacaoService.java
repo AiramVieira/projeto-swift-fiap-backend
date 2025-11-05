@@ -7,25 +7,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.swift.backend.model.Autenticacao;
+import com.swift.backend.model.Usuario;
 import com.swift.backend.repository.AutenticacaoRepository;
+import com.swift.backend.repository.AutenticacaoRepositoryImpl;
+import com.swift.backend.repository.UsuarioRepository;
 
 @Service
 public class AutenticacaoService {
     
     @Autowired
     private AutenticacaoRepository autenticacaoRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     public List<Autenticacao> getAllAutenticacoes() {
         return autenticacaoRepository.findAll();
     }
 
-    public Optional<Autenticacao> getAutenticacaoById(Integer id) {
-        return autenticacaoRepository.findById(id);
+    @Autowired
+    private AutenticacaoRepositoryImpl autenticacaoRepositoryImpl;
+    
+    public Integer getCdUsuarioByEmailAndSenha(String email, String senha) {
+        return autenticacaoRepositoryImpl.findByEmailAndSenhaAndStatusConta(email, senha).get().getUsuario().getCdUsuario();
     }
 
     public Autenticacao createAutenticacao(Autenticacao autenticacao) {
         validateAutenticacao(autenticacao);
-        return autenticacaoRepository.save(autenticacao);
+        
+        if (autenticacao.getUsuario() == null || autenticacao.getUsuario().getCdUsuario() == null) {
+            throw new IllegalArgumentException("Usuário é obrigatório para criar autenticação");
+        }
+        
+        Optional<Usuario> usuario = usuarioRepository.findById(autenticacao.getUsuario().getCdUsuario());
+        if (usuario.isEmpty()) {
+            throw new IllegalArgumentException("Usuário não encontrado com código: " + autenticacao.getUsuario().getCdUsuario());
+        }
+        
+        autenticacao.setUsuario(usuario.get());
+        Autenticacao saved = autenticacaoRepository.save(autenticacao);
+        
+        usuario.get().setCdAutenticacao(saved.getCdAutenticacao());
+        usuarioRepository.save(usuario.get());
+        
+        return saved;
     }
 
     public void updateAutenticacao(Integer id, Autenticacao autenticacao) {
@@ -36,6 +61,17 @@ public class AutenticacaoService {
         
         autenticacao.setCdAutenticacao(id);
         validateAutenticacao(autenticacao);
+        
+        if (autenticacao.getUsuario() != null && autenticacao.getUsuario().getCdUsuario() != null) {
+            Optional<Usuario> usuario = usuarioRepository.findById(autenticacao.getUsuario().getCdUsuario());
+            if (usuario.isEmpty()) {
+                throw new IllegalArgumentException("Usuário não encontrado com código: " + autenticacao.getUsuario().getCdUsuario());
+            }
+            autenticacao.setUsuario(usuario.get());
+        } else {
+            autenticacao.setUsuario(existing.get().getUsuario());
+        }
+        
         autenticacaoRepository.save(autenticacao);
     }
 
@@ -56,9 +92,6 @@ public class AutenticacaoService {
         }
         if (autenticacao.getStatusConta() == null || autenticacao.getStatusConta().trim().isEmpty()) {
             throw new IllegalArgumentException("Status da conta é obrigatório");
-        }
-        if (autenticacao.getCdUsuario() == null) {
-            throw new IllegalArgumentException("Código do usuário é obrigatório");
         }
     }
 }

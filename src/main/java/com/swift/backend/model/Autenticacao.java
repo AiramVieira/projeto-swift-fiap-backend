@@ -1,22 +1,34 @@
 package com.swift.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "t_fin_autenticacao")
 public class Autenticacao {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_autenticacao")
+    @SequenceGenerator(name = "seq_autenticacao", sequenceName = "seq_autenticacao", allocationSize = 1)
     @Column(name = "cd_autenticacao")
     private Integer cdAutenticacao;
     
-    @Column(name = "cd_usuario", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cd_usuario", nullable = false)
+    private Usuario usuario;
+    
+    @Transient
     private Integer cdUsuario;
     
     @Column(name = "email", nullable = false)
@@ -31,9 +43,9 @@ public class Autenticacao {
     public Autenticacao() {
     }
 
-    public Autenticacao(Integer cdAutenticacao, Integer cdUsuario, String email, String senha, String statusConta) {
+    public Autenticacao(Integer cdAutenticacao, Usuario usuario, String email, String senha, String statusConta) {
         this.cdAutenticacao = cdAutenticacao;
-        this.cdUsuario = cdUsuario;
+        this.usuario = usuario;
         this.email = email;
         this.senha = senha;
         this.statusConta = statusConta;
@@ -47,12 +59,28 @@ public class Autenticacao {
         this.cdAutenticacao = cdAutenticacao;
     }
 
-    public Integer getCdUsuario() {
-        return cdUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+    
+    @JsonSetter("cdUsuario")
     public void setCdUsuario(Integer cdUsuario) {
         this.cdUsuario = cdUsuario;
+        if (cdUsuario != null && (this.usuario == null || !cdUsuario.equals(this.usuario.getCdUsuario()))) {
+            this.usuario = new Usuario();
+            this.usuario.setCdUsuario(cdUsuario);
+        }
+    }
+    
+    public Integer getCdUsuario() {
+        if (usuario != null) {
+            return usuario.getCdUsuario();
+        }
+        return cdUsuario;
     }
 
     public String getEmail() {

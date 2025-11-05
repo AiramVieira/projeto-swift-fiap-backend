@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,7 +15,8 @@ import jakarta.persistence.Table;
 public class Usuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
+    @SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1)
     @Column(name = "cd_usuario")
     private Integer cdUsuario;
     
@@ -33,7 +35,7 @@ public class Usuario {
     @Column(name = "ativo")
     private Character ativo;
     
-    @Column(name = "vl_saldo", nullable = false)
+    @Column(name = "vl_saldo", nullable = false, columnDefinition = "NUMBER(12,2)")
     private Double vlSaldo;
 
     public Usuario() {
